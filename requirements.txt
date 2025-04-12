@@ -1,0 +1,8 @@
+Flask==3.0.0
+requests
+groq
+python-dotenv
+speechrecognition
+edge-tts
+pydub
+asyncio

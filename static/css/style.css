@@ -1,0 +1,731 @@
+/* --- Base & Modern Dark Theme Variables --- */
+:root {
+    --bg-color: #0d1117; /* Very dark grey (GitHub dark) */
+    --container-bg: #161b22; /* Slightly lighter dark grey */
+    --header-bg: #1f242c; /* Header dark grey */
+    --input-bg: #1f242c; /* Input area background */
+    --user-msg-bg: #005C4B; /* WhatsApp dark green for user messages */
+    --assistant-msg-bg: #2a3942; /* Dark grey for assistant messages */
+    --primary-color: #2f81f7; /* Bright blue accent */
+    --primary-hover: #4c9aff;
+    --text-primary: #c9d1d9; /* Light grey text (main) */
+    --text-secondary: #8b949e; /* Dimmer grey text */
+    --border-color: #30363d; /* Subtle border color */
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --error-color: #f85149; /* Error red */
+    --success-color: #3fb950; /* Success green */
+    --font-main: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100%; /* Ensure html takes full height */
+}
+
+body {
+    font-family: var(--font-main);
+    background: var(--bg-color);
+    color: var(--text-primary); /* Default text color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Changed to min-height */
+    padding: 15px;
+    line-height: 1.6;
+}
+
+/* --- Chat Container --- */
+.chat-container {
+    width: 100%;
+    max-width: 700px; /* Max width on desktop */
+    height: 90vh; /* Adjusted height for desktop */
+    max-height: 850px;
+    background-color: var(--container-bg);
+    border-radius: 12px; /* Slightly more rounded */
+    box-shadow: 0 8px 25px var(--shadow-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--border-color); /* Subtle border */
+}
+
+/* --- START: New Header Layout (Visible + Dropdown) --- */
+
+/* Base Header Styling (Background, Border) */
+.chat-header {
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+    /* New layout rules follow */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative; /* Crucial for positioning the dropdown */
+    padding: 10px 15px; /* Keep consistent padding */
+    gap: 15px; /* Add gap between title and right controls */
+}
+
+.chat-header h1 {
+    font-size: 1.2em; /* Adjusted size from base */
+    color: var(--text-primary);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0; /* Ensure no default margin */
+    flex-shrink: 0; /* Prevent title shrinking too much */
+}
+
+.chat-header h1 i {
+    color: var(--primary-color); /* Use accent color */
+}
+
+/* Container for the right side controls (visible + toggle) */
+.header-right-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Adjust gap between visible controls and toggle button */
+}
+
+/* Container for the always-visible controls */
+.visible-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Gap between visible Voice Gender and Mute */
+}
+
+/* Styling for items directly in .visible-controls */
+.visible-controls .control-group {
+    /* Inherits display:flex, align-items:center from parent if needed */
+    /* Or add specific styles here */
+    gap: 5px; /* Reduce gap within visible groups if needed */
+}
+
+.visible-controls .voice-gender-group label.sr-only {
+    /* Visually hide the label but keep for accessibility */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.visible-controls #voice-gender {
+    padding: 4px 8px; /* Smaller padding for header select */
+    font-size: 0.85em; /* Smaller font size */
+    background-color: var(--container-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+    /* Adjust width if needed, or let it size by content */
+}
+.visible-controls #voice-gender:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(47, 129, 247, 0.2);
+}
+
+/* Use base .control-button styles defined later */
+.visible-controls .mute-toggle {
+     /* Inherits .control-button - adjust size if needed */
+     width: 38px;  /* Smaller for header */
+     height: 38px; /* Smaller for header */
+     font-size: 1em; /* Slightly smaller icon? */
+     /* Ensure icon color is appropriate */
+     color: var(--text-secondary);
+}
+.visible-controls .mute-toggle:hover {
+     /* Inherit hover from .control-button or customize */
+     background-color: rgba(255, 255, 255, 0.1);
+     color: var(--primary-hover);
+}
+
+
+/* The dropdown toggle button */
+.dropdown-toggle {
+    /* Inherits .control-button */
+    width: 38px; /* Match visible mute button size */
+    height: 38px;
+    font-size: 1em;
+    color: var(--text-secondary);
+}
+.dropdown-toggle:hover {
+     /* Inherit hover from .control-button or customize */
+     background-color: rgba(255, 255, 255, 0.1);
+     color: var(--primary-hover);
+}
+
+/* The dropdown container itself */
+.controls-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: calc(100% + 5px); /* Position below the header */
+    right: 15px; /* Align to the right */
+    background-color: var(--header-bg); /* Match header */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Use variable */
+    z-index: 100;
+    flex-direction: column; /* Vertical layout */
+    align-items: flex-start;
+    gap: 15px; /* Space between items in dropdown */
+    min-width: 250px;
+}
+
+/* Class added by JS to show dropdown */
+.controls-dropdown.visible {
+    display: flex;
+}
+
+/* Styles for items *inside* the dropdown */
+.controls-dropdown .control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    /* margin-left: 0; Remove any inherited margin */
+}
+
+.controls-dropdown .control-group label {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 80px; /* Align selects/buttons */
+    white-space: nowrap;
+}
+.controls-dropdown .control-group i {
+    color: var(--text-secondary);
+}
+
+.controls-dropdown .control-group select,
+.controls-dropdown .control-group .control-button { /* Includes clear button */
+    flex-grow: 1; /* Allow select/button to take remaining space */
+    padding: 6px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--container-bg);
+    color: var(--text-primary);
+    font-size: 0.9em;
+    cursor: pointer;
+    outline: none;
+    width: auto; /* Override any fixed width from .control-button */
+    height: auto; /* Override any fixed height from .control-button */
+    /* Ensure buttons have correct display for centering icon */
+    display: flex;
+    align-items: center;
+}
+
+/* Ensure icon-only buttons in dropdown don't grow excessively and center content */
+.controls-dropdown .control-group .control-button {
+    flex-grow: 0; /* Don't let button grow */
+    justify-content: center;
+    min-width: 40px; /* Min width for clear/mute button in dropdown */
+    text-align: center;
+    /* Icon color should inherit or be set */
+    color: var(--text-secondary);
+}
+.controls-dropdown .control-group .control-button:hover {
+    /* Add hover style for buttons inside dropdown */
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--primary-hover);
+}
+
+.controls-dropdown .control-group select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(47, 129, 247, 0.2);
+}
+
+/* Add the sr-only class (if not defined globally elsewhere) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Style for the Mute Toggle Icon WHEN it IS muted (Applies wherever it is) */
+.mute-toggle.muted i::before {
+    content: "\f6a9"; /* Font Awesome Unicode for fa-volume-xmark */
+    font-family: "Font Awesome 6 Free"; /* Ensure correct font family */
+    font-weight: 900; /* Required for Solid style icons */
+}
+
+/* --- END: New Header Layout --- */
+
+
+/* --- Intro Section --- */
+.intro-section {
+    padding: 30px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(22, 27, 34, 0.8), rgba(13, 17, 23, 0.9)), var(--container-bg); /* Dark gradient */
+    color: var(--text-primary);
+    border-radius: 0 0 10px 10px; /* Only bottom corners rounded if header is present */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.intro-text {
+    font-size: 2.2em;
+    font-weight: 700;
+    color: #ffffff; /* Brighter white for title */
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    margin-bottom: 25px;
+    font-family: var(--font-main);
+}
+
+.intro-desc {
+    font-size: 1.05em;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    font-weight: 400;
+    max-width: 90%;
+    margin: 15px auto;
+}
+
+.intro-controls {
+    background-color: rgba(255, 255, 255, 0.05); /* Very subtle background */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin: 25px auto;
+    max-width: 85%;
+}
+
+.intro-controls p {
+    margin: 8px 0;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.intro-controls strong {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.intro-section button.button { /* Specificity for intro button */
+    display: inline-block;
+    padding: 10px 25px;
+    background-color: var(--primary-color);
+    border-radius: 20px; /* Pill shape */
+    font-size: 1rem;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    border: none; /* Remove border */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+    margin-top: 20px;
+    align-self: center;
+
+}
+
+.intro-section button.button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px); /* Slight lift */
+    box-shadow: 0 4px 15px rgba(47, 129, 247, 0.3);
+}
+
+
+/* --- Chat History --- */
+.chat-history {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px 15px; /* Adjusted padding */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between messages */
+    background-color: var(--container-bg); /* Match container */
+}
+
+/* Custom Scrollbar (Dark Theme) */
+.chat-history::-webkit-scrollbar {
+    width: 8px;
+}
+.chat-history::-webkit-scrollbar-track {
+    background: var(--container-bg);
+    border-radius: 10px;
+}
+.chat-history::-webkit-scrollbar-thumb {
+    background: #484f58; /* Darker scrollbar thumb */
+    border-radius: 10px;
+}
+.chat-history::-webkit-scrollbar-thumb:hover {
+    background: #58a6ff; /* Use primary color on hover */
+}
+
+/* --- Messages (WhatsApp Style) --- */
+.message {
+    padding: 8px 14px; /* Adjusted padding */
+    border-radius: 12px; /* Rounded corners */
+    max-width: 75%; /* Max width */
+    line-height: 1.5;
+    font-size: 0.95em;
+    word-wrap: break-word; /* Break long words */
+    position: relative; /* Needed for potential future elements like timestamps */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+.user-message {
+    background-color: var(--user-msg-bg);
+    color: #ffffff; /* White text on dark green */
+    border-top-right-radius: 5px; /* Less rounded corner for "tail" effect */
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.assistant-message {
+    background-color: var(--assistant-msg-bg);
+    color: var(--text-primary);
+    border-top-left-radius: 5px; /* Less rounded corner for "tail" effect */
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+/* --- Input Area --- */
+.input-area {
+    display: flex;
+    padding: 12px 15px; /* Adjusted padding */
+    border-top: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0; /* Prevent input area from shrinking */
+}
+
+#user-input {
+    flex-grow: 1;
+    padding: 10px 18px; /* Comfortable padding */
+    border: 1px solid var(--border-color);
+    border-radius: 20px; /* Pill shape */
+    font-size: 1em;
+    background-color: var(--container-bg); /* Match container slightly */
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#user-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+#user-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.2); /* Focus ring */
+}
+
+/* Base style for ALL control buttons (input area, header visible, header toggle) */
+.control-button {
+    padding: 0; /* Remove padding, use width/height for sizing icon buttons */
+    border: none;
+    border-radius: 50%;
+    width: 42px; /* Base size for input area buttons */
+    height: 42px; /* Base size for input area buttons */
+    background-color: transparent; /* Make button bg transparent */
+    color: var(--text-secondary); /* Use secondary text color for icons */
+    font-size: 1.2em; /* Base icon size */
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+    display: flex; /* Use flex to center icon */
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0; /* Prevent buttons shrinking */
+    line-height: 1; /* Helps vertical alignment */
+}
+
+.control-button:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle hover */
+    color: var(--primary-hover); /* Change icon color on hover */
+}
+
+.control-button:active {
+    transform: scale(0.92);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Input area specific button overrides */
+.input-area .send-button {
+   color: var(--primary-color); /* Make send icon accent color */
+}
+.input-area .send-button:hover {
+   color: var(--primary-hover);
+   background-color: rgba(47, 129, 247, 0.1); /* Blueish hover */
+}
+
+.input-area .voice-button.recording {
+    background-color: var(--error-color);
+    color: white; /* White icon when recording */
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(248, 81, 73, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); }
+}
+
+/* --- Utility & Status --- */
+.status-indicator {
+    padding: 8px 15px;
+    font-size: 0.85em;
+    text-align: center;
+    color: var(--text-secondary);
+    background-color: var(--header-bg); /* Match header */
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+/* Style for the Mute Toggle base (uses .control-button, already defined) */
+/* .mute-toggle {} */
+
+/* Style for the icon INSIDE the mute button when muted is defined in Header section */
+
+
+.copyright-notice {
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 10px 15px;
+    background-color: var(--header-bg);
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+/* Initial state for UI elements based on mode */
+#record-button {
+    display: none; /* Hide record button initially */
+}
+
+/* --- Responsiveness --- */
+
+/* --- MERGED Media Queries --- */
+
+@media (max-width: 600px) {
+    body {
+        padding: 0; /* Remove body padding for edge-to-edge */
+        min-height: 100vh;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-container {
+        width: 100%; /* Full width */
+        height: 100%; /* Make container fill the flex body */
+        max-width: 100%;
+        max-height: none;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        flex-grow: 1; /* Allow container to grow and fill space */
+    }
+
+    /* --- Header Adjustments (New Layout) --- */
+    .chat-header {
+        padding: 8px 10px; /* Adjust padding */
+        gap: 10px;
+    }
+    .chat-header h1 {
+       font-size: 1.15em; /* From base */
+       flex-shrink: 0; /* From base */
+    }
+    .header-right-controls {
+        /* Adjust gap if needed */
+        /* gap: 3px; */
+    }
+    .visible-controls {
+       gap: 5px; /* Reduce gap in visible controls */
+    }
+    .visible-controls #voice-gender {
+       padding: 3px 6px;
+       font-size: 0.8em;
+    }
+    /* Adjust visible header buttons AND dropdown toggle */
+    .visible-controls .mute-toggle,
+    .dropdown-toggle {
+       width: 34px;
+       height: 34px;
+       font-size: 0.95em;
+    }
+    /* Adjust dropdown container */
+    .controls-dropdown {
+       right: 10px; /* Align to new padding */
+       min-width: 200px; /* Adjust dropdown width */
+       padding: 10px;
+       gap: 10px;
+    }
+    /* Adjust items inside dropdown */
+    .controls-dropdown .control-group label {
+       min-width: 60px;
+       font-size: 0.85em;
+    }
+    .controls-dropdown .control-group select,
+    .controls-dropdown .control-group .control-button {
+       font-size: 0.85em;
+       padding: 4px 8px;
+    }
+    .controls-dropdown .control-group .control-button { /* e.g. Mute, Clear */
+       min-width: 35px; /* Adjust min width for icon buttons */
+    }
+    /* --- End Header Adjustments --- */
+
+    /* Intro Section Adjustments */
+    .intro-section {
+        padding: 20px;
+        overflow-y: auto;
+    }
+    .intro-text {
+        font-size: 1.8em;
+        margin-bottom: 15px;
+    }
+    .intro-desc {
+        font-size: 0.95em;
+        max-width: 100%;
+    }
+    .intro-controls {
+        max-width: 95%;
+        padding: 10px 15px;
+    }
+    .intro-section button.button {
+        padding: 8px 20px;
+        font-size: 0.95rem;
+    }
+
+    /* Chat History Adjustments */
+    .chat-history {
+        padding: 15px 10px;
+        gap: 8px;
+    }
+
+    .message {
+        max-width: 85%;
+        font-size: 0.92em;
+        padding: 7px 12px;
+    }
+
+    /* Input Area Adjustments */
+    .input-area {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+
+    #user-input {
+        padding: 9px 15px;
+        font-size: 0.95em;
+    }
+
+    /* Base control button size for input area */
+    .input-area .control-button {
+        width: 38px;   /* Reduced */
+        height: 38px;  /* Reduced */
+        font-size: 1.05em;
+    }
+
+    /* Footer/Status Adjustments */
+    .status-indicator {
+        padding: 6px 10px;
+        font-size: 0.8em;
+    }
+    .copyright-notice {
+        padding: 8px 10px;
+        font-size: 0.7em;
+    }
+}
+
+/* Optional: Media Query for VERY small screens (e.g., below 400px) */
+@media (max-width: 400px) {
+    /* --- Header Adjustments (New Layout) --- */
+    .chat-header {
+        /* Maybe force title and right controls onto separate lines */
+        /* flex-wrap: wrap; */
+        gap: 8px; /* Further reduce gap */
+    }
+     .chat-header h1 {
+        font-size: 1.1em;
+    }
+
+    .header-right-controls {
+        /* Take full width if header wraps */
+        /* width: 100%; */
+        /* justify-content: flex-end; */
+        gap: 3px;
+    }
+    .visible-controls {
+        gap: 4px;
+    }
+    .visible-controls #voice-gender {
+        /* Maybe hide or make even smaller */
+    }
+    /* Adjust visible header buttons AND dropdown toggle */
+    .visible-controls .mute-toggle,
+    .dropdown-toggle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9em;
+    }
+    /* Adjust dropdown container */
+    .controls-dropdown {
+        right: 5px;
+        min-width: 180px;
+        padding: 8px; /* Further reduce padding */
+        gap: 8px;
+    }
+    /* Optionally hide labels in dropdown on very small screens */
+    .controls-dropdown .control-group label {
+         display: none; /* Hide labels */
+    }
+    .controls-dropdown .control-group {
+        gap: 4px; /* Reduce gap when labels hidden */
+    }
+    .controls-dropdown .control-group select,
+    .controls-dropdown .control-group .control-button {
+       padding: 4px 6px; /* Further reduce padding */
+       font-size: 0.8em;
+    }
+    .controls-dropdown .control-group .control-button { /* Mute/Clear */
+        min-width: 30px;
+    }
+    /* --- End Header Adjustments --- */
+
+    .input-area {
+        gap: 5px; /* Further reduce gap */
+    }
+    /* Base control button size for input area */
+    .input-area .control-button {
+        width: 36px; /* Even smaller */
+        height: 36px;
+        font-size: 1em;
+    }
+    #user-input {
+        padding: 8px 12px;
+    }
+
+    .message {
+        max-width: 90%;
+        font-size: 0.9em;
+    }
+}
+
+/* --- REMEMBER TO INCLUDE ALL OTHER CSS RULES (if any) AND ENSURE HTML STRUCTURE MATCHES SELECTORS --- */

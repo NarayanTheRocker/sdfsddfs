@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naru Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="chat-container">
+        <header class="chat-header">
+            <h1><i class="fa-solid fa-brain"></i> Naru Assistant</h1>
+
+            <div class="header-right-controls">
+
+                <div class="visible-controls">
+                    <div class="control-group voice-gender-group">
+                        <label for="voice-gender" class="sr-only"><i class="fa-solid fa-venus-mars"></i> Voice:</label>
+                        <select id="voice-gender" title="Select Voice Gender">
+                            <option value="female" selected>Female</option>
+                            <option value="male">Male</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <button id="mute-button" class="control-button mute-toggle" title="Mute/Unmute Audio">
+                            <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                    </div>
+                </div><button id="dropdown-toggle-button" class="control-button dropdown-toggle" title="More Settings">
+                    <i class="fas fa-chevron-down"></i> </button>
+
+            </div> <div id="dropdown-controls" class="controls-dropdown">
+                <div class="control-group"> <label for="state-select"><i class="fa-solid fa-map-location-dot"></i> State:</label>
+                    <select id="state-select" title="Select Indian State/UT for context">
+                        {% if states %}
+                            {% for state in states %}
+                                <option value="{{ state }}">{{ state }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="">States unavailable</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="control-group"> <label for="input-mode"><i class="fa-solid fa-keyboard"></i> Mode:</label>
+                    <select id="input-mode">
+                        <option value="text" selected>Text</option>
+                        <option value="voice">Voice</option>
+                    </select>
+                </div>
+                <div class="control-group"> <label for="clear-chat-button"><i class="fas fa-trash-alt"></i> Chat:</label>
+                   <button id="clear-chat-button" class="control-button clear-chat" title="Clear Chat History" style="display: none;"> <i class="fas fa-trash-alt"></i> </button>
+                   </div>
+            </div></header>
+
+        <div class="intro-section" id="intro-section">
+             <p class="intro-text">Hii this is naru !!</p>
+             <p class="intro-desc"> I'm your friendly AI buddy. Whether you need fashion tips, weather updates, movie suggestions, or just someone to talk to—I’m here for you!</p>
+             <p class="intro-desc">Naru can learn from your inputs and make better decisions. It is meant for providing strong emotional support and assisting with general tasks and activities.</p>
+
+             <div class="intro-controls">
+                 <p><strong>Customize your experience:</strong></p>
+                 <p>Use the dropdown menus at the top to select your state, switch between text and voice input, and select your preferred voice gender.</p>
+                 <p>Use the speaker icon (<i class="fa-solid fa-volume-high"></i>/<i class="fa-solid fa-volume-xmark"></i>) to mute or unmute audio responses.</p>
+                 <p>Use the trash icon (<i class="fas fa-trash-alt"></i>) to clear the chat.</p> {# Added clear button mention #}
+             </div>
+
+             <button id="start-chat-button" class="intro-section button">Start Chat</button>
+        </div>
+
+        <main class="chat-history" id="chat-history" style="display: none;">
+            </main>
+
+        <footer class="input-area" style="display: none;">
+            <button id="record-button" class="control-button voice-button" title="Record Voice Input"><i class="fa-solid fa-microphone"></i></button>
+            <input type="text" id="user-input" placeholder="Ask Naru...">
+            <button id="send-button" class="control-button send-button" title="Send Message"><i class="fa-solid fa-paper-plane"></i></button>
+        </footer>
+
+        <div id="status" class="status-indicator">Ready</div>
+        <audio id="audio-player" style="display:none;"></audio>
+        <p class="copyright-notice">This model is intended for educational purposes only. Do not use for commercial purposes. Copyright © 2025 Narayan.</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // *** Updated IDs ***
+            const dropdownToggleBtn = document.getElementById('dropdown-toggle-button');
+            const dropdownControls = document.getElementById('dropdown-controls');
+
+            if (dropdownToggleBtn && dropdownControls) {
+                dropdownToggleBtn.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent click from immediately closing dropdown
+                    const isVisible = dropdownControls.classList.toggle('visible');
+                    const icon = dropdownToggleBtn.querySelector('i');
+
+                    // Update icon and title for better UX (Chevron Down/Up)
+                    if (isVisible) {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                        dropdownToggleBtn.setAttribute('title', 'Hide Settings');
+                    } else {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                        dropdownToggleBtn.setAttribute('title', 'More Settings');
+                    }
+                });
+
+                // Close dropdown if clicking outside of it
+                document.addEventListener('click', (event) => {
+                    // Check if the click is outside the controls container AND outside the toggle button
+                    if (dropdownControls && !dropdownControls.contains(event.target) && dropdownToggleBtn && !dropdownToggleBtn.contains(event.target) && dropdownControls.classList.contains('visible')) {
+                        dropdownControls.classList.remove('visible');
+                        // Reset icon and title
+                        const icon = dropdownToggleBtn.querySelector('i');
+                        if (icon) {
+                             icon.classList.remove('fa-chevron-up');
+                             icon.classList.add('fa-chevron-down');
+                        }
+                        dropdownToggleBtn.setAttribute('title', 'More Settings');
+                    }
+                });
+
+                 // --- Logic for Clear Chat Button Visibility (Keep this logic) ---
+                 const chatHistory = document.getElementById('chat-history');
+                 const clearChatButton = document.getElementById('clear-chat-button'); // Button is now inside dropdown
+                 const startChatButton = document.getElementById('start-chat-button');
+
+                 const checkClearButtonVisibility = () => {
+                     if (chatHistory && clearChatButton) {
+                         const chatIsVisible = chatHistory.style.display !== 'none';
+                         const chatHasContent = chatHistory.children.length > 0;
+                         // Find the parent control group to hide/show
+                         const clearChatGroup = clearChatButton.closest('.control-group');
+
+                         if (clearChatGroup) { // Check if group exists
+                             if (chatIsVisible && chatHasContent) {
+                                clearChatGroup.style.display = 'flex'; // Show the whole group
+                             } else {
+                                 clearChatGroup.style.display = 'none'; // Hide the whole group
+                             }
+                         } else if (chatIsVisible && chatHasContent) {
+                             // Fallback if closest isn't found (shouldn't happen with current HTML)
+                              clearChatButton.style.display = 'flex';
+                         } else {
+                             clearChatButton.style.display = 'none';
+                         }
+                     }
+                 };
+
+                 if (chatHistory) {
+                     const observer = new MutationObserver(mutations => {
+                         mutations.forEach(mutation => {
+                             if (mutation.attributeName === 'style' || mutation.type === 'childList') {
+                                 checkClearButtonVisibility();
+                             }
+                         });
+                     });
+                     observer.observe(chatHistory, { attributes: true, childList: true, subtree: true });
+                 }
+
+                 if (startChatButton) {
+                    startChatButton.addEventListener('click', () => {
+                        setTimeout(checkClearButtonVisibility, 100);
+                    });
+                 }
+                 checkClearButtonVisibility(); // Initial check
+
+            } else {
+                console.error("Dropdown toggle button or dropdown controls container not found!");
+            }
+        });
+    </script>
+    </body>
+</html>
+    </body>
+</html>
+</body>
+</html>
